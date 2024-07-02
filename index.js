@@ -1,44 +1,52 @@
+const axios = require('axios');
 const Promise = require('bluebird');
-const request = require('request-promise');
 
 const rejectMissingArg = (argName) => Promise.reject(new Error(`Missing ${argName}`));
 
-module.exports = ({apiKey = ''}) => {
+module.exports = ({ apiKey = '' }) => {
   if (!apiKey) {
     throw new Error('Missing apiKey');
   }
 
-  function _request(args) {
-    return request.defaults({
-      baseUrl: 'https://api.squarespace.com/1.0/commerce',
-      json: true,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'User-Agent': 'squarespace-node-api',
-        'Authorization': `Bearer ${apiKey}`
-      }
-    })(args).promise();
+  const instance = axios.create({
+    baseURL: 'https://api.squarespace.com/1.0/commerce',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'User-Agent': 'squarespace-node-api',
+      'Authorization': `Bearer ${apiKey}`
+    }
+  });
+
+  function _request(config) {
+    return instance(config)
+      .then(response => response.data)
+      .catch(error => {
+        if (error.response) {
+          return Promise.reject(new Error(`Request failed with status code ${error.response.status}`));
+        }
+        return Promise.reject(error);
+      });
   }
 
   return {
-    get(url, qs = {}) {
+    get(url, params = {}) {
       if (!url) {
         return rejectMissingArg('url');
       }
 
-      return _request({url, method: 'GET', qs});
+      return _request({ url, method: 'GET', params });
     },
 
-    post(url, body) {
+    post(url, data) {
       if (!url) {
         return rejectMissingArg('url');
       }
 
-      if (!body || isEmptyObject(body)) {
+      if (!data || isEmptyObject(data)) {
         return rejectMissingArg('body');
       }
 
-      return _request({url, method: 'POST', body});
+      return _request({ url, method: 'POST', data });
     }
   };
 };

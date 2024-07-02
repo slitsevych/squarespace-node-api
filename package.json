@@ -21,8 +21,7 @@
   },
   "homepage": "https://github.com/zenfulfillment/squarespace-node-api#readme",
   "dependencies": {
-    "bluebird": "^3.5.1",
-    "request": "^2.87.0",
-    "request-promise": "^4.2.2"
+    "bluebird": "^3.7.2",
+    "axios": "^1.7.2"
   }
 }
